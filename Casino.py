@@ -1,10 +1,13 @@
-from random import randint
+from random import *
 import cmd
 import textwrap
 import sys
 import os
 import time
 import pickle
+from io import TextIOWrapper
+sys.stdout = TextIOWrapper(
+    sys.stdout.buffer, encoding='UTF-8', errors='replace')
 
 
 class Player:
@@ -136,7 +139,17 @@ def coin_flip():
             guess = "heads"
         elif guess in "tails":
             guess = "tails"
-        bet = int(input("What amount are you wagering on that wild guess? $$$ "))
+        else:
+            print("Please enter a valid choice, {}".format(player.name))
+            coin_flip()
+        try:
+            bet = int(
+                input("What amount are you wagering on that wild guess? $$$ "))
+        except ValueError:
+            print("We take only whole numbers, {}, we are dreadfuly sorry.".format(
+                player.name))
+            coin_flip()
+
         if bet <= player.money:
             lucky = randint(0, 1)
 
@@ -168,8 +181,110 @@ def coin_flip():
 
 
 def cha_hon():
+    function = cha_hon
+    card_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
+                 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52]
+    card_dict = {
+        1: '2 \u2663',
+        2: '2 \u2666',
+        3: '2 \u2665',
+        4: '2 \u2660',
+        5: '3 \u2663',
+        6: '3 \u2666',
+        7: '3 \u2665',
+        8: '3 \u2660',
+        9: '4 \u2663',
+        10: '4 \u2666',
+        11: '4 \u2665',
+        12: '4 \u2660',
+        13: '5 \u2663',
+        14: '5 \u2666',
+        15: '5 \u2665',
+        16: '5 \u2660',
+        17: '6 \u2663',
+        18: '6 \u2666',
+        19: '6 \u2665',
+        20: '6 \u2660',
+        21: '7 \u2663',
+        22: '7 \u2666',
+        23: '7 \u2665',
+        24: '7 \u2660',
+        25: '8 \u2663',
+        26: '8 \u2666',
+        27: '8 \u2665',
+        28: '8 \u2660',
+        29: '9 \u2663',
+        30: '9 \u2666',
+        31: '9 \u2665',
+        32: '9 \u2660',
+        33: '10 \u2663',
+        34: '10 \u2666',
+        35: '10 \u2665',
+        36: '10 \u2660',
+        37: '14 \u2663',
+        38: '14 \u2666',
+        39: '14 \u2665',
+        40: '14 \u2660',
+        41: '12 \u2663',
+        42: '12 \u2666',
+        43: '12 \u2665',
+        44: '12 \u2660',
+        45: '13 \u2663',
+        46: '13 \u2666',
+        47: '13 \u2665',
+        48: '13 \u2660',
+        49: '11 \u2663',
+        50: '11 \u2666',
+        51: '11 \u2665',
+        52: '11 \u2660'
+    }
     print("Playing Cha Hon")
+
+    try:
+        bet = int(
+            input("What amount are you wagering on this most simple card game? $$$ "))
+    except ValueError:
+        print("We take only whole numbers, {}, we are dreadfuly sorry.".format(
+            player.name))
+        cha_hon()
+
+    if bet > player.money:
+        print("You can't afford that, {}".format(player.name))
+        cha_hon()
+
+    while card_list:
+        player_card = choice(card_list)
+        card_list.remove(player_card)
+        enemy_card = choice(card_list)
+        card_list.remove(enemy_card)
+        time.sleep(2)
+        print("Your card is: {}".format(card_dict[player_card]))
+
+        print("The enemy card is: {}".format(card_dict[enemy_card]))
+
+        if player_card > enemy_card:
+            player.money += bet
+            print("Wow, you have won {} $!".format(bet))
+        else:
+            player.money -= bet
+            print("Sadly you have lost {} $. Better luck next time!".format(bet))
+
+        update()
+        play_again(function)
+
     choices()
+
+
+def play_again(function):
+
+    while True:
+        play_again_str = input("Would you like to play again? ")
+        if play_again_str in play_again_list[0] or play_again_str in play_again_list[1]:
+            break
+    if play_again_str in play_again_list[0]:
+        function()
+    elif play_again_str in play_again_list[1]:
+        choices()
 
 
 def roulette():
