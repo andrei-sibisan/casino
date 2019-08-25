@@ -9,6 +9,8 @@ from io import TextIOWrapper
 sys.stdout = TextIOWrapper(
     sys.stdout.buffer, encoding='UTF-8', errors='replace')
 
+global player
+
 
 class Player:
     def __init__(self, name):
@@ -50,18 +52,16 @@ def title_screen():
 
 
 def new_game():
-    global player
+
     inp_name = input("What is your name, traveller? > ")
     player.name = inp_name
+    greeting = "\nHello, {name}, you have travelled from far away to join our merry Casino! \nThe ocean is weary and tired tonight, so come on in and enjoy a glass of whiskey! \n\n<{name} goes inside, looking quite tired.> \n<He sips from the whiskey the waiter serves him.> \n\nOh, there you are! Garcon! His raincoat, please! Never can get enough help these days. ".format(
+        name=player.name)
     choices()
 
 
 def choices():
 
-    global player
-    greeting = "\nHello, {name}, you have travelled from far away to join our merry Casino! \nThe ocean is weary and tired tonight, so come on in and enjoy a glass of whiskey! \n\n<{name} goes inside, looking quite tired.> \n<He sips from the whiskey the waiter serves him.> \n\nOh, there you are! Garcon! His raincoat, please! Never can get enough help these days. ".format(
-        name=player.name)
-    print(greeting)
     print("\n\nWhat would you like to play?")
     print("1. Coin flip")
     print("2. Cha Hon")
@@ -120,10 +120,26 @@ def update():
     if player.money > 0:
         print("A wing herald comes down from the ceiling, loudly proclaiming: \n" +
               quotes_alive[random_quote])
+        print("You have {} $ left!".format(player.money))
+
     if player.money <= 0:
         print("A wing herald comes down from the ceiling, loudly proclaiming: \n" +
               quotes_dead[random_quote])
         sys.exit()
+
+
+def bet_amnt():
+    while True:
+        try:
+            bet_amount = abs(
+                int(input("{}, place your bet :-> ".format(player.name))))
+            if bet_amount > player.money:
+                print("Can't afford that, suga' daddy!")
+            else:
+                break
+        except ValueError:
+            print("Please please use whole numbers!")
+    return bet_amount
 
 
 def coin_flip():
@@ -152,26 +168,26 @@ def coin_flip():
 
         if bet <= player.money:
             lucky = randint(0, 1)
+            if lucky == 0:
+                print("The coin flipped tails.")
+            else:
+                print("The coin flipped heads.")
 
-            if guess in str(bets[guess]) == lucky:
+            if bets[guess] == lucky:
                 player.money += int(bet)
-                print(player.name + ", you have a grand total of" +
+                print("Congratz, " + player.name + ", you win!")
+                print(player.name + ", you have a grand total of " +
                       str(player.money) + "$!")
             else:
+
                 player.money -= int(bet)
+                print("Darn, " + player.name + ", you lose!")
                 print(player.name + ", you have " +
                       str(player.money) + "$ left!")
             update()
 
-            play_again = input("Would you like to play again? ")
+            play_again(coin_flip)
 
-            if play_again in play_again_list[0]:
-                coin_flip()
-            elif play_again in play_again_list[1]:
-                choices()
-            else:
-                print("Enter a valid choice!")
-                play_again()
         else:
             print("You can't afford that, " + player.name)
             choices()
@@ -285,12 +301,347 @@ def play_again(function):
         function()
     elif play_again_str in play_again_list[1]:
         choices()
+    else:
+        play_again(function)
 
 
 def roulette():
-    print("Playing roulette")
+    roulette_nums = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30,
+                     8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26]
+    io_bets = ["1", "2", "inside bet", "outside bet"]
+    i_bets = ["1", "2", "3", "4", "5", "6", "7", "straight",
+              "split", "street", "corner", "double street", "trio", "first four"]
+    o_bets = ["1", "2", "3", "4", "5", "6", "low or high", "red or black",
+              "even or odd", "dozen bet", "column bet", "snake bet"]
+    straight = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+                26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
+    h_or_v = ["horizontal", "vertical"]
+
+    inv_vert_split = [34, 35, 36]
+
+    print("Playing roulette...")
+    print("What type of bet would you favor?")
+    print("1. Inside bet")
+    print("2. Outside bet")
+    while True:
+        player_choice = input(":-> ").lower()
+        try:
+            if player_choice in io_bets[0] or player_choice in io_bets[1]:
+                break
+            elif player_choice in io_bets[2] or player_choice in io_bets[3]:
+                break
+            elif player_choice in io_bets[4]:
+                break
+        except IndexError:
+            print("Choose something from the list, please!")
+
+    if player_choice in io_bets[0] or player_choice in io_bets[2]:
+        print(player.name + ", you are going for an inside bet! Most luck to you! ")
+        print("1. Straight")
+        print("2. Split")
+        print("3. Street")
+        print("4. Corner")
+        print("5. Double Street")
+        print("6. Trio")
+        print("7. First four")
+        while True:
+            player_choice = input(
+                "Choose your final bet type :-> ").lower()
+            try:
+                if player_choice in i_bets[0] or player_choice in i_bets[7]:
+                    break
+                elif player_choice in i_bets[1] or player_choice in i_bets[8]:
+                    break
+                elif player_choice in i_bets[2] or player_choice in i_bets[9]:
+                    break
+                elif player_choice in i_bets[3] or player_choice in i_bets[10]:
+                    break
+                elif player_choice in i_bets[4] or player_choice in i_bets[11]:
+                    break
+                elif player_choice in i_bets[5] or player_choice in i_bets[12]:
+                    break
+                elif player_choice in i_bets[6] or player_choice in i_bets[13]:
+                    break
+
+            except IndexError:
+                print("Enter something from the list above!")
+
+        if player_choice in i_bets[0] or player_choice in i_bets[7]:
+            while True:
+                try:
+
+                    bet_choice = int(
+                        input("Enter a number from 0 to 36 :-> "))
+                    if bet_choice in straight:
+                        break
+
+                except ValueError:
+                    print("Whole numbers please!")
+
+            bet_amount = bet_amnt()
+
+            lucky = choice(roulette_nums)
+            print("Fortuna yelded lucky number: " + str(lucky))
+            if bet_choice == lucky:
+                print("Congratz! You have won!")
+                player.money += bet_amount
+
+            else:
+                print("Sorry mate, you have lost! Better luck next time! ")
+                player.money -= bet_amount
+
+            update()
+            play_again(roulette)
+
+        if player_choice in i_bets[1] or player_choice in i_bets[8]:
+            print("Trouble? Make it Double! ")
+            while True:
+                player_choice = input("Horizontal or Vertical? :-> ")
+                try:
+                    if player_choice in h_or_v[0] or player_choice in h_or_v[1]:
+                        break
+                except IndexError:
+                    print("Please choose between Horizontal and Vertical splits!")
+            if player_choice in h_or_v[0]:
+                print("You have chosen a horizontal split. ")
+                print("Make your bet!")
+                while True:
+                    try:
+
+                        bet_choice = int(
+                            input("Enter your first number from 1 to 35 :-> "))
+                        if bet_choice % 3 == 0:
+                            print(
+                                "Invalid choice, no split possible with that number...")
+                        elif bet_choice < 1 or bet_choice > 35:
+                            print(
+                                "Invalid choice, no split possible with that number...")
+                        else:
+                            betting_group = [bet_choice, bet_choice + 1]
+                            print("Your horizontal split is " +
+                                  str(betting_group))
+                            break
+
+                    except ValueError:
+                        print("Whole numbers please!")
+
+                bet_amount = bet_amnt()
+
+                lucky = choice(roulette_nums)
+                print("Fortuna yelded lucky number: " + str(lucky))
+
+                if lucky in betting_group:
+
+                    print("Congratz! You have won!")
+                    player.money += bet_amount
+
+                else:
+                    print("Sorry mate, you have lost! Better luck next time! ")
+                    player.money -= bet_amount
+
+                update()
+                play_again(roulette)
+
+            if player_choice in h_or_v[1]:
+                print("You have chosen a vertical split. ")
+                print("Make your bet!")
+
+                while True:
+
+                    try:
+
+                        bet_choice = int(
+                            input("Enter your first number from 1 to 33 :-> "))
+                        if bet_choice in inv_vert_split:
+                            print(
+                                "Invalid choice, no vertical split possible with that number...")
+                        elif bet_choice < 1 or bet_choice > 33:
+                            print(
+                                "Invalid choice, no vertical split possible with that number...")
+                        else:
+                            betting_group = [bet_choice, bet_choice + 3]
+                            print("Your vertical split is " +
+                                  str(betting_group))
+                            break
+
+                    except ValueError:
+                        print("Whole numbers please!")
+
+                bet_amount = bet_amnt()
+
+                lucky = choice(roulette_nums)
+                print("Fortuna yelded lucky number: " + str(lucky))
+
+                if lucky in betting_group:
+
+                    print("Congratz! You have won!")
+                    player.money += bet_amount
+
+                else:
+                    print("Sorry mate, you have lost! Better luck next time! ")
+                    player.money -= bet_amount
+
+                update()
+                play_again(roulette)
+
+        if player_choice in i_bets[2] or player_choice in i_bets[9]:
+            print("There are some mean streets out there, " + player.name)
+            print("Make your bet!")
+            while True:
+                try:
+                    player_choice = int(
+                        input("Enter a number from your street :-> "))
+                    if player_choice < 1 or player_choice > 36:
+                        print("Please enter a valid number, from 1 to 36")
+
+                    elif player_choice % 3 == 0:
+                        betting_group = [player_choice - 2,
+                                         player_choice - 1, player_choice]
+                        break
+
+                    elif player_choice % 3 == 1:
+                        betting_group = [player_choice,
+                                         player_choice + 1, player_choice + 2]
+                        break
+
+                    elif player_choice % 3 == 2:
+                        betting_group = [
+                            player_choice - 1, player_choice, player_choice + 1]
+                        break
+                except ValueError:
+                    print("We need a whole number for this, sir!")
+            print("Your bet is " + str(betting_group))
+
+            bet_amount = bet_amnt()
+            lucky = choice(roulette_nums)
+            print("Fortuna casts the number " + str(lucky) + "!")
+            if lucky in betting_group:
+                print("Congratz! You have won!")
+                player.money += bet_amount
+            else:
+                print("Ouch! You have lost!")
+                player.money -= bet_amount
+
+            update()
+            play_again(roulette)
+
+        if player_choice in i_bets[3] or player_choice in i_bets[10]:
+            print("Wow, there are some tight corners coming up!")
+            print("Make your bet!")
+            while True:
+                try:
+                    print("Choose the top left corner of your square:")
+                    player_choice = int(input("Numbers 1 to 32: "))
+                    if player_choice < 1 or player_choice > 32:
+                        print("We need a valid number, sir")
+                    elif player_choice % 3 == 0:
+                        print("Please choose the top left corner, sir")
+                    else:
+                        betting_group = [
+                            player_choice, player_choice + 1, player_choice + 3, player_choice + 4]
+                        break
+                except ValueError:
+                    print("We need a whole number, sir!")
+
+            print("Your bet is " + str(betting_group))
+            print("If you changed your mind, just bet 0!")
+            bet_amount = bet_amnt()
+            lucky = choice(roulette_nums)
+            print("Fortuna chose the number " + str(lucky))
+            if lucky in betting_group:
+                print("Congratz, you have won!")
+                player.money += bet_amount
+            else:
+                print("Darn! Better luck next time!")
+                player.money -= bet_amount
+            update()
+            play_again(roulette)
+
+        if player_choice in i_bets[4] or player_choice in i_bets[11]:
+            print("Some day your domain will cover two whole streets!")
+            print("Make your bet!")
+            while True:
+                try:
+                    print("Choose a number from your top street.")
+                    player_choice = int(input("Numbers 1-33 "))
+                    if player_choice < 1 or player_choice > 33:
+                        print("Please enter a valid number!")
+                    elif player_choice % 3 == 0:
+                        betting_group = [player_choice - 2, player_choice - 1, player_choice,
+                                         player_choice + 1, player_choice + 2, player_choice + 3]
+                        break
+                    elif player_choice % 3 == 2:
+                        betting_group = [player_choice - 1, player_choice, player_choice +
+                                         1, player_choice + 2, player_choice + 3, player_choice + 4]
+                        break
+                    elif player_choice % 3 == 1:
+                        betting_group = [player_choice, player_choice + 1, player_choice +
+                                         2, player_choice + 3, player_choice + 4, player_choice + 5]
+                        break
+                except ValueError:
+                    print("We need a whole number, sir!")
+
+            print("Your bet is on " + str(betting_group))
+            print("To change your mind, just bet 0!")
+            bet_amount = bet_amnt()
+            lucky = choice(roulette_nums)
+            print("Fortuna casts the number {}".format(lucky))
+            if lucky in betting_group:
+                print("Heaven smiles down on you!")
+                player.money += bet_amount
+            else:
+                print("Daaarn! Bad luck!")
+                player.money -= bet_amount
+
+            update()
+            play_again(roulette)
+
+        if player_choice in i_bets[5] or player_choice in i_bets[12]:
+            print("Betting on a trio is simple! Good luck!")
+            betting_group = [0, 1, 2]
+            print("You bet on the following " + str(betting_group))
+            print("To change your mind, just bet 0!")
+            bet_amount = bet_amnt()
+            lucky = choice(roulette_nums)
+            print("Fortuna casts the number {}".format(lucky))
+            if lucky in betting_group:
+                print("That trio worked for you!")
+                player.money += bet_amount
+            else:
+                print("Daaarn! Bad luck!")
+                player.money -= bet_amount
+
+            update()
+            play_again(roulette)
+
+        if player_choice in i_bets[6] or player_choice in i_bets[13]:
+            print("Betting on a bascket is simple! Good luck!")
+            betting_group = [0, 1, 2, 4]
+            print("You bet on the following " + str(betting_group))
+            print("To change your mind, just bet 0!")
+            bet_amount = bet_amnt()
+            lucky = choice(roulette_nums)
+            print("Fortuna casts the number {}".format(lucky))
+            if lucky in betting_group:
+                print("If it works for you, it works for me! Congratz")
+                player.money += bet_amount
+            else:
+                print("Daaarn! Bad luck!")
+                player.money -= bet_amount
+            update()
+            play_again(roulette)
+
+    elif player_choice in io_bets[1] or player_choice in io_bets[3]:
+
+        print("1. Low or High")
+        print("2. Red or Black")
+        print("3. Even or Odd")
+        print("4. Dozen Bet")
+        print("5. Column Bet")
+        print("6. Snake Bet")
+
     choices()
 
 
-os.system("clear")
+os.system("cls")
 title_screen()
